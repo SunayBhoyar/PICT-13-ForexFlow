@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const countrySchema = new mongoose.Schema({
-  country: String,
+  date: Date,
   currencyExchange: Object
 })
 

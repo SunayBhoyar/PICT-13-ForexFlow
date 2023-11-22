@@ -65,8 +65,8 @@ def process_csv():
         file_content = request.files['file'].read().decode('utf-8')
         df_result, missing_dates = process_csv_file(file_content)
 
-        # Step 6: Save the result to a new CSV file (optional)
         output_file_path = 'output_processed.csv'
+        df_result['index'] = pd.to_datetime(df_result['index'])
         df_result.to_csv(output_file_path, index=False)
 
         response_data = {
