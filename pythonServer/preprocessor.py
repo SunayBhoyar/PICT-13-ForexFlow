@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 import pandas as pd
-from io import BytesIO, StringIO
+from io import StringIO
 
 app = Flask(__name__)
 
@@ -30,11 +30,18 @@ def identify_missing_dates(original_date_range, df):
 def fill_missing_dates(df, column_names, window_size=10):
     # Fills missing values in the DataFrame.
     for i in range(1, len(column_names)):
-        # Forward fill and then backward fill to fill missing values at the beginning
-        df[column_names[i]].ffill(inplace=True)
-        df[column_names[i]].bfill(inplace=True)
-        # Fill missing values with the mean of a window of 10 surrounding elements
-        df[column_names[i]].fillna(df[column_names[i]].rolling(window=window_size, min_periods=1).mean(), inplace=True)
+        column_name = column_names[i]
+        new_column_name = column_name.strip()
+
+        # Forward fill, backward fill, and fill missing values with the mean of a window
+        df[new_column_name] = df[column_name].ffill().bfill().fillna(df[column_name].rolling(window=window_size, min_periods=1).mean())
+
+        # Identify the values that were filled and add '*' to them
+        filled_values = df[column_name].isnull() & ~df[new_column_name].isnull()
+        df.loc[filled_values, new_column_name] = df.loc[filled_values, new_column_name].astype(str) + '*'
+        df[new_column_name] = df[new_column_name].astype(str)
+    # Drop the original columns except 'Date'
+    df.drop(column_names[1:], axis=1, inplace=True)
     return df
 
 def process_csv_file(csv_content):
@@ -62,23 +69,13 @@ def process_csv():
         file_content = request.files['file'].read().decode('utf-8')
         df_result, missing_dates = process_csv_file(file_content)
 
-        # Step 6: Save the result to a new CSV file (optional)
-        output_file_path = 'output_processed.csv'
-        df_result.to_csv(output_file_path, index=False)
+        response_data = {
+            'message': 'Processing complete',
+            'missing_dates': missing_dates.tolist(),
+            'result': df_result.to_dict(orient='records')
+        }
 
-        # response_data = {
-        #     'message': 'Processing complete',
-        #     'missing_dates': missing_dates.tolist(),
-        #     'result': jsonify(df_result)
-        # }
-        return send_file(
-            BytesIO(output_file_path.encode()),
-            mimetype='text/csv',
-            as_attachment=True,
-            download_name='output_processed.csv'
-        )
-
-        # return jsonify(response_data), 200
+        return jsonify(response_data), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
