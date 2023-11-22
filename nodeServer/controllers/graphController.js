@@ -1,5 +1,9 @@
 const axios = require('axios')
 const FormData = require('form-data')
+const mongoose = require('mongoose')
+
+const CountryModel = require('../models/countryCurrencyModel')
+const MissingModel = require('../models/missingModel')
 
 exports.getData = async (req, res, next) => {
   try {
@@ -7,7 +11,29 @@ exports.getData = async (req, res, next) => {
     const response = await axios.get(
       'http://127.0.0.1:5000/get-process-csv-response'
     )
-    console.log(response.data)
+    const data = response.data
+    const dates = data.missing_dates
+
+    const missing = new MissingModel({
+      dates: Object.values(dates)
+    })
+    await missing.save()
+
+    var c = 10
+    data.result.forEach(async countryData => {
+      c -= 1
+      if (c < 0) {
+        return
+      }
+      var countryName = countryData.index
+      delete countryData.index
+      var countryExchangeObject = countryData
+      const newDocument = new CountryModel({
+        country: countryName,
+        currencyExchange: countryExchangeObject
+      })
+      await newDocument.save()
+    })
     return res.status(200).json({ message: 'Success!!', data: response.data })
   } catch (error) {
     return res.status(404).json({ message: error.message })

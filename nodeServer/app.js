@@ -13,8 +13,9 @@ app.use(express.json({ limit: '30mb' }))
 app.use(express.urlencoded({ limit: '30mb', extended: true }))
 app.use(cors())
 
+const database = "CSV"
 const CONNECTION_URL =
-  'mongodb+srv://awadhootk6:Jnpppllfb83@cluster0.l36eigo.mongodb.net/?retryWrites=true&w=majority'
+`mongodb+srv://awadhootk6:Jnpppllfb83@cluster0.l36eigo.mongodb.net/${database}?retryWrites=true&w=majority`
 const PORT = process.env.PORT || 3000
 
 mongoose
