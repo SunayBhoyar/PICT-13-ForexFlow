@@ -1,0 +1,49 @@
+Documentation :
+
+Overview :
+    The application is a Flask web server that processes CSV files. It performs the following steps:
+
+    1. Reads a CSV file from the client.
+    2. Extracts the year and generates date ranges based on the 'Date' column.
+    3. Identifies missing dates in the original data.
+    4. Reindexes the DataFrame with a new date range.
+    5. Fills missing values in the DataFrame using forward fill, backward fill, and the mean of a window.
+    6. Adds '*' to the values that were filled.
+    7. Drops the original columns except 'Date'.
+    8. Optionally saves the processed DataFrame to a new CSV file.
+
+Endpoints:
+    POST /process_csv: Accepts a CSV file upload, processes it, and returns processing results.
+        Request:
+            Form Data: 'file' (CSV file)
+
+        Response:
+            JSON:
+                'message': 'Processing complete'
+                'missing_dates': List of missing dates
+                'result': Processed DataFrame in JSON format
+
+    GET /get-process-csv-response: Retrieves the most recent processing response.
+        Response:
+            JSON:
+                'message': 'Processing complete'
+                'missing_dates': List of missing dates
+                'result': Processed DataFrame in JSON format
+
+Installation:
+    Flask: Web framework for the application.
+    $pip install Flask
+
+    Pandas: Library for data manipulation and analysis.
+    $pip install pandas
+
+Running the Application
+    1. Save the code to a file, for example, app.py.
+    2. Open a terminal and navigate to the directory containing app.py.
+    3. Run the application:
+    $python app.py
+    4.The Flask development server should start, and you can access the application at http://127.0.0.1:5000/.
+
+Usage
+    Upload a CSV file using the /process_csv endpoint.
+    Retrieve the processing response using the /get-process-csv-response endpoint.

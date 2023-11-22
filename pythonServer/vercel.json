@@ -1,0 +1,22 @@
+{
+    "functions": {
+      "process_csv": {
+        "runtime": "python3.8",
+        "memory": 1024,
+        "maxDuration": 10
+      }
+    },
+    "builds": [
+      {
+        "src": "preprocessor.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/preprocessor.py"
+      }
+    ]
+  }
+  

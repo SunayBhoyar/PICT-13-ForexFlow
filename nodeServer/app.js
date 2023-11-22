@@ -1,19 +1,31 @@
-const { MongoClient } = require('mongodb');
+const express = require('express')
+const mongoose = require('mongoose')
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const upload = require('express-fileupload')
+const graphRoutes = require('./routes/graphRoutes')
 
-const uri = 'mongodb://localhost:27017';
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const app = express()
 
-async function connectToMongoDB() {
-  try {
-    await client.connect();
-    console.log('Connected to MongoDB');
+app.use(upload())
+app.use(express.static('public'))
+app.use(express.json({ limit: '30mb' }))
+app.use(express.urlencoded({ limit: '30mb', extended: true }))
+app.use(cors())
 
-    const database = client.db('forexflow');
+const CONNECTION_URL =
+  'mongodb+srv://awadhootk6:Jnpppllfb83@cluster0.l36eigo.mongodb.net/?retryWrites=true&w=majority'
+const PORT = process.env.PORT || 3000
 
-  } finally {
-    await client.close();
-    console.log('Disconnected from MongoDB');
-  }
-}
+mongoose
+  .connect(CONNECTION_URL)
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  })
+  .catch(e => console.log(e))
 
-connectToMongoDB();
+app.use('/', graphRoutes)
+app.get('/upload', (req, res) => {
+    res.sendFile('/Users/awadhootkhutwad/Desktop/PICT-13-ForexFlow/nodeServer/form.html')
+})
+app.get('/ping', (req, res) => res.send('pong'))
