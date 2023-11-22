@@ -82,6 +82,70 @@ const convertDate = dateString => {
   return formattedDate
 }
 
+exports.getCountryList = async (req, res, next) => {
+  try {
+    const response = await CountryModel.findOne({})
+    return res.status(200).json({
+      message: 'Countries fetched successfully',
+      data: Object.keys(response.currencyExchange)
+    })
+  } catch (error) {
+    return res.status(404).json({ message: error.message })
+  }
+}
+
+exports.getAllCountryExchange = async (req, res, next) => {
+  try {
+    var sourceCountry = req.body.sourceCountry
+    var startDate = new Date(req.body.startDate)
+    var endDate = new Date(req.body.endDate)
+    const docCount = req.body.docCount
+
+    const countryData = await CountryModel.aggregate([
+      {
+        $match: {
+          date: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $project: {
+          date: 1,
+          countryCurrencies: { $objectToArray: '$currencyExchange' }
+        }
+      },
+      {
+        $unwind: '$countryCurrencies'
+      },
+      {
+        $group: {
+          _id: '$countryCurrencies.k',
+          exchangeRates: { $push: '$countryCurrencies.v' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          currency: '$_id',
+          date: 1,
+          exchangeRates: { $slice: ['$exchangeRates', docCount] } // Limit exchangeRates array to 10 elements
+        }
+      },
+      {
+        $limit: docCount
+      }
+    ])
+
+    return res
+      .status(200)
+      .json({ message: 'Countries fetched successfully', data: countryData })
+  } catch (error) {
+    return res.status(404).json({ message: error.message })
+  }
+}
+
 exports.getDetails = async (req, res, next) => {
   try {
     var sourceCountry = req.body.sourceCountry
@@ -183,7 +247,9 @@ exports.getDetails = async (req, res, next) => {
       return res.status(404).json({ message: 'Country not found!' })
     }
     console.log(countryData)
-    return res.status(200).json({ message: 'Documents fetched successfully', data: countryData })
+    return res
+      .status(200)
+      .json({ message: 'Documents fetched successfully', data: countryData })
   } catch (error) {
     return res.status(404).json({ message: error.message })
   }
