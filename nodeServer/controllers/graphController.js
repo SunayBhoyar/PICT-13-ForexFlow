@@ -148,11 +148,11 @@ exports.getAllCountryExchange = async (req, res, next) => {
 
 exports.getDetails = async (req, res, next) => {
   try {
-    var sourceCountry = req.body.sourceCountry
-    var destinationCountry = req.body.destinationCountry
-    var startDate = new Date(req.body.startDate)
-    var endDate = new Date(req.body.endDate)
-
+    var sourceCountry = req.params.sourceCountry
+    var destinationCountry = req.params.destinationCountry
+    var startDate = new Date(req.params.startDate)
+    var endDate = new Date(req.params.endDate)
+    console.log(sourceCountry,destinationCountry,startDate,endDate);
     if (!sourceCountry) {
       sourceCountry = 'U.S. dollar   (USD)'
     }

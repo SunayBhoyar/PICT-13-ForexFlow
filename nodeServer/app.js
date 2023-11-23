@@ -26,7 +26,8 @@ mongoose
   .catch(e => console.log(e))
 
 app.use('/', graphRoutes)
-app.get('/upload', (req, res) => {
-    res.sendFile('/Users/awadhootkhutwad/Desktop/PICT-13-ForexFlow/nodeServer/form.html')
-})
+// app.get('/upload', (req, res) => {
+//     res.sendFile(__dirname+'/form.html')
+// })
+
 app.get('/ping', (req, res) => res.send('pong'))
